@@ -15,22 +15,19 @@ const downloader = (url, destination) => {
       await pipeline(got.stream(url), fs.createWriteStream(destination));
       resolve();
     } catch (e) {
-      reject(e.message);
+      let message;
+
+      switch (e.code) {
+        case 'ENOTFOUND':
+          message = `ERROR: Unable to reach requested URI.\n -> Check your internet connection.`;
+          break;
+        default:
+          message = `Unable to download ${url}`;
+      }
+
+      reject(new Error(message));
     }
   });
 };
-
-// const prepareTargetDir = (dir) => {
-//   return new Promise((resolve, reject) => {
-//     if (!fs.existsSync(dir)) {
-//       fs.mkdirSync(dir, {}, (e) => {
-//         if (e) {
-//           reject({ message: 'Error accessing target directory' });
-//         }
-//       });
-//     }
-//     resolve(true);
-//   });
-// };
 
 module.exports = downloader;
